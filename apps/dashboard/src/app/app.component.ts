@@ -2,8 +2,8 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppFacade } from '@mdv12/core-state';
 import { AuthFacade } from '@mdv12/core-state';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { takeUntil, tap } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 
 @Component({
   selector: 'mdv12-root',
@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy{
+  authenticated$: Observable<boolean>;
   destroy$: Subject<true> = new Subject();
   initialized$;
   title = 'dashboard';
@@ -30,14 +31,19 @@ export class AppComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     this.initialized$ = this.facade.initialized$;
+    this.authenticated$ = this.authFacade.authenticated$;
     this.facade.initialize();
 
-    // this.facade.loading$.pipe(takeUntil(this.destroy$)).subscribe((x) => {
-    //   if(x !== this.loading) {
-    //     this.loading = x;
-    //     // this.cdRef.detectChanges();
-    //   }
-    // });
+    this.authenticated$.pipe(tap((x) => {
+      console.log(x);
+    }));
+
+    this.facade.loading$.pipe(takeUntil(this.destroy$)).subscribe((x) => {
+      if(x !== this.loading) {
+        this.loading = x;
+        this.cdRef.detectChanges();
+      }
+    });
   }
 
   ngOnDestroy(): void {

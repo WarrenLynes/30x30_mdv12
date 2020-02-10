@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="mat-elevation-z4">
+<mat-toolbar color="primary" class="mat-elevation-z4" *ngIf="authenticated$ | async; else notauthd">
   <span>
     <button mat-mini-fab color="accent" (click)="sidenav.toggle();">
       <mat-icon>menu</mat-icon>
@@ -9,6 +9,9 @@
     <mat-icon>add</mat-icon>
   </button>
 </mat-toolbar>
+<ng-template #notauthd>
+  <div class="toolbar-spacer"></div>
+</ng-template>
 
 
 <mat-sidenav-container>

@@ -1,11 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
 import {AuthService} from '@mdv12/core-data';
 import { AuthFacade } from '@mdv12/core-state';
+import { first, map, takeUntil } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, OnDestroy {
+
+  destroy$: Subject<boolean> = new Subject();
 
   constructor(
     private router: Router,
@@ -13,12 +17,23 @@ export class AuthGuard implements CanActivate {
     private facade: AuthFacade
   ) { }
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    if (this.authenticationService.isAuthenticated()) {
-      return true;
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+  }
 
-    this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-    return false;
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):Observable<boolean>|boolean {
+
+    return this.facade.authenticated$.pipe(
+      takeUntil(this.destroy$),
+      first(),
+      map(x => {
+        if(x) {
+          return true;
+        } else {
+          this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+          return false;
+        }
+      })
+    );
   }
 }
