@@ -1,0 +1,21 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <h1> COMPUTERS </h1>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item *ngFor="let computer of data$ | async">
+          <h3 mat-line >{{computer.title}}</h3>
+          <p  mat-line >{{computer.details}}</p>
+          <span mat-line>{{computer.coolLevel}}</span>
+          <button mat-button (click)="onEdit(computer)">
+            <mat-icon>menu</mat-icon>
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>
